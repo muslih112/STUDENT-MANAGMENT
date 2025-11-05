@@ -1,16 +1,10 @@
 import mongoose from "mongoose";
 
-export default async function connDb() {
+export const connDb = async () => {
   try {
-    await mongoose.connect(
-      "mongodb+srv://muslihmuhammad112:Fgw9NOxENp1mIGRe@students.ljjibuu.mongodb.net/?retryWrites=true&w=majority&appName=students",
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      }
-    );
-    console.log("MongoDB connected successfully!");
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("Connection Successful");
   } catch (err) {
-    console.error("MongoDB connection error:", err);
+    console.log("can not connect to server", err);
   }
-}
+};

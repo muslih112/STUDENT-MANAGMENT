@@ -11,9 +11,12 @@ const TableBody = () => {
   const [records, setRecords] = useState([]);
   const [activeuser, setActiveUser] = useState(null);
   const [view, setView] = useState(false);
-  const [studentname, setStudentName] = useState("");
-  const [classname, setClassName] = useState("");
-  const [age, setAge] = useState("");
+
+  const [formData, setFormData] = useState({
+    name: "",
+    class: "",
+    age: "",
+  });
 
   return (
     <div className="table_head shadow-2xl h-full m-10 w-full">
@@ -38,9 +41,7 @@ const TableBody = () => {
             onClick={() => {
               setView((prev) => !prev);
               setIsEditing(false);
-              setStudentName("");
-              setClassName("");
-              setAge("");
+              setFormData({ name: "", class: "", age: "" });
             }}
             className="add-button rounded-xl text-center border-none bg-green-400 cursor-pointer text-lg h-10 w-25"
           >
@@ -53,34 +54,25 @@ const TableBody = () => {
         <AddSubmit
           records={records}
           setRecords={setRecords}
-          classname={classname}
-          setClassName={setClassName}
-          studentname={studentname}
-          setStudentName={setStudentName}
           PushToFirstItem={PushToFirstItem}
-          age={age}
-          setAge={setAge}
           isEditing={isEditing}
           activeuser={activeuser}
           setIsEditing={setIsEditing}
           view={view}
           setView={setView}
+          setFormData={setFormData}
+          formData={formData}
         />
       ) : (
         <Table
-          age={age}
-          setAge={setAge}
-          isEditing={isEditing}
           activeuser={activeuser}
           setIsEditing={setIsEditing}
           records={records}
           setRecords={setRecords}
-          classname={classname}
-          setClassName={setClassName}
-          studentname={studentname}
-          setStudentName={setStudentName}
           setActiveUser={setActiveUser}
           setView={setView}
+          setFormData={setFormData}
+          formData={formData}
         />
       )}
     </div>

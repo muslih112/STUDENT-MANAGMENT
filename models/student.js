@@ -1,17 +1,20 @@
+// models/student.js
 import mongoose from "mongoose";
+
 const studentSchema = new mongoose.Schema({
   name: {
     type: String,
-    require: true,
+    required: true,
   },
   class: {
     type: String,
-    require: true,
+    required: true,
   },
   age: {
     type: Number,
-    require: true,
+    required: true,
   },
 });
 
-module.exports = mongoose.model("Student", studentSchema);
+export const Student =
+  mongoose.models.student || mongoose.model("student", studentSchema);

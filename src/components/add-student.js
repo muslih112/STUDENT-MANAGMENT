@@ -2,12 +2,8 @@
 
 const AddSubmit = ({
   PushToFirstItem,
-  studentname,
-  setStudentName,
-  classname,
-  setClassName,
-  age,
-  setAge,
+  setFormData,
+  formData,
   isEditing,
   setIsEditing,
   records,
@@ -18,57 +14,81 @@ const AddSubmit = ({
 }) => {
   const reassignAndSort = (list) => {
     return list
-      .map((item, index) => ({ ...item, id: index + 1 }))
-      .sort((a, b) => a.id - b.id);
+      .map((item, index) => ({ ...item, number: index + 1 }))
+      .sort((a, b) => a.number - b.number);
   };
 
-  const SubmitStudent = () => {
-    const newList = [{ studentname, classname, age }, ...records];
-    setRecords(reassignAndSort(newList));
-    setStudentName("");
-    setClassName("");
-    setAge("");
-    setView(false);
-    setIsEditing(false);
-  };
-
-  const updateUser = (operationType) => {
-    const filteredList = records.filter((item) => item.id !== activeuser.id);
-    if (operationType === PushToFirstItem[0]) {
-      const updatedList = [{ studentname, classname, age }, ...filteredList];
-      setRecords(reassignAndSort(updatedList));
-    }
-    setStudentName("");
-    setClassName("");
-    setAge("");
-    setIsEditing(false);
-    setView(false);
-  };
-
-  const studentData = {
-    studentname,
-    classname,
-    age,
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const SubmitStudent = async () => {
+    const data = { ...formData, age: Number(formData.age) };
 
     try {
       const res = await fetch("/api/students", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(studentData),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
       });
 
       const result = await res.json();
-      console.log("Server response:", result);
+      if (!res.ok) throw new Error(result.error || "Failed to add student");
 
-      isEditing ? updateUser(PushToFirstItem[0]) : SubmitStudent();
-    } catch (error) {
-      console.error("Error submitting form:", error);
+      const newList = [result, ...records];
+      setRecords(reassignAndSort(newList));
+      console.log("Student added:", result);
+    } catch (err) {
+      console.error("Error adding student:", err);
+    } finally {
+      resetForm();
+    }
+  };
+
+  const UpdateStudent = async () => {
+    if (!activeuser || !activeuser._id) {
+      console.error("No valid active user ID for update");
+      return;
+    }
+
+    const data = { ...formData, age: Number(formData.age) };
+
+    try {
+      const res = await fetch(`/api/students/${activeuser._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Failed to update student");
+
+      const updatedList = records.map((student) =>
+        student._id === activeuser._id ? result : student
+      );
+      setRecords(reassignAndSort(updatedList));
+
+      console.log("Student updated:", result);
+    } catch (err) {
+      console.error("Error updating student:", err);
+    } finally {
+      resetForm();
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({ name: "", class: "", age: "" });
+    setIsEditing(false);
+    setView(false);
+  };
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isEditing) {
+      await UpdateStudent();
+    } else {
+      await SubmitStudent();
     }
   };
 
@@ -79,27 +99,32 @@ const AddSubmit = ({
           <input
             placeholder="Name"
             required
-            value={studentname}
-            onChange={(e) => setStudentName(e.target.value)}
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
             className="border bg-white h-10 w-full mb-5 px-3"
           />
           <input
             placeholder="Class"
             required
-            value={classname}
-            onChange={(e) => setClassName(e.target.value)}
+            type="text"
+            name="class"
+            value={formData.class}
+            onChange={handleChange}
             className="border bg-white h-10 w-full mb-5 px-3"
           />
           <input
             placeholder="Age"
-            type="number"
             required
-            value={age}
-            onChange={(e) => setAge(e.target.value)}
+            type="number"
+            name="age"
+            value={formData.age}
+            onChange={handleChange}
             className="border bg-white h-10 w-full mb-5 px-3"
           />
           <button type="submit" className="w-full h-10 bg-green-400">
-            {isEditing ? "Update" : "Submit"}
+            {isEditing ? "Update Student" : "Add Student"}
           </button>
         </div>
       </form>
